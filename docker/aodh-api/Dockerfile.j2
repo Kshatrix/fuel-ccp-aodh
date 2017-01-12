@@ -1,0 +1,16 @@
+FROM {{ image_spec("aodh-base") }}
+MAINTAINER {{ maintainer }}
+
+COPY daemon.sh /usr/local/bin/daemon.sh
+COPY aodh_sudoers /etc/sudoers.d/aodh_sudoers
+
+RUN apt-get install -y --no-install-recommends \
+        mysql-client \
+        apache2 \
+        libapache2-mod-wsgi \
+    && apt-get clean \
+    && mkdir -p /var/www/aodh /var/log/apache2 /home/aodh \
+    && cp /aodh/aodh/api/app.wsgi /var/www/aodh/app \
+    && chown -R aodh:aodh /var/www/aodh/app /home/aodh \
+    && chmod 755 /usr/local/bin/daemon.sh \
+    && chmod 440 /etc/sudoers.d/aodh_sudoers

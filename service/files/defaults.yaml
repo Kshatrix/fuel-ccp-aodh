@@ -1,0 +1,25 @@
+configs:
+  aodh:
+    api_port:
+      cont: 8042
+      ingress: alarming
+
+    debug: false
+    
+    db:
+      username: aodh
+      password: password
+      name: aodh
+
+    auth:
+      user: aodh
+      password: password
+
+    wsgi:
+      processes: 2
+      threads: 10
+
+sources:
+  openstack/aodh:
+    git_url: https://git.openstack.org/openstack/aodh.git
+    git_ref: stable/newton

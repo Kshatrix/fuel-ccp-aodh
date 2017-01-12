@@ -1,0 +1,18 @@
+dsl_version: 0.5.0
+service:
+  name: aodh-notifier
+  containers:
+    - name: aodh-notifier
+      image: aodh-notifier
+      daemon:
+        files:
+          - aodh-conf
+        dependencies:
+          - rabbitmq
+          - aodh-api
+        command: aodh-notifier --config-file /etc/aodh/aodh.conf
+
+files:
+  aodh-conf:
+    path: /etc/aodh/aodh.conf
+    content: aodh.conf.j2

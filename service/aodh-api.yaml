@@ -1,0 +1,70 @@
+dsl_version: 0.5.0
+service:
+  name: aodh-api
+  ports:
+    - {{ aodh.api_port }}
+  containers:
+    - name: aodh-api
+      image: aodh-api
+      volumes:
+        - name: keystone-logs
+          path: "/var/log/ccp/aodh"
+          type: host
+      pre:
+        - name: aodh-db-create
+          dependencies:
+            - {{ service.database }}
+          type: single
+          command:
+            mysql -u root -p{{ db.root_password }} -h {{ address(service.database) }} -e "create database {{ aodh.db.name }};
+            grant all privileges on {{ aodh.db.name }}.* to '{{ aodh.db.username }}'@'%' identified by '{{ aodh.db.password }}';"
+        - name: aodh-db-sync
+          files:
+            - aodh-conf
+          dependencies:
+            - aodh-db-create
+          type: single
+          command: aodh-dbsync --config-file /etc/aodh/aodh.conf
+        - name: aodh-user-create
+          dependencies:
+            - keystone-create-project
+          type: single
+          command: openstack user create --domain default --password {{ aodh.auth.password  }} {{ aodh.auth.user }}
+        - name: aodh-role-add
+          dependencies:
+            - aodh-user-create
+          type: single
+          command: openstack role add --project service --user {{ aodh.auth.user }} admin
+        - name: aodh-service-create
+          dependencies:
+            - keystone
+          type: single
+          command: openstack service create --name aodh --description "OpenStack Alarming Service" alarming
+        - name: aodh-public-endpoint-create
+          dependencies:
+            - aodh-service-create
+          type: single
+          command: openstack endpoint create --region RegionOne alarming public {{ address("aodh-api", aodh.api_port, external=True, with_scheme=True) }}
+        - name: aodh-internal-endpoint-create
+          dependencies:
+            - aodh-service-create
+          type: single
+          command: openstack endpoint create --region RegionOne alarming internal {{ address("aodh-api", aodh.api_port, with_scheme=True) }}
+        - name: aodh-admin-endpoint-create
+          dependencies:
+            - aodh-service-create
+          type: single
+          command: openstack endpoint create --region RegionOne alarming admin {{ address("aodh-api", aodh.api_port, with_scheme=True) }}
+      daemon:
+        files:
+          - aodh-conf
+          - wsgi-aodh-conf
+        command: daemon.sh
+
+files:
+  aodh-conf:
+    path: /etc/aodh/aodh.conf
+    content: aodh.conf.j2
+  wsgi-aodh-conf:
+    path: /etc/apache2/conf-enabled/wsgi-aodh.conf
+    content: wsgi-aodh.conf.j2

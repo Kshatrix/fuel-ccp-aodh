@@ -1,0 +1,12 @@
+{% set venv_path = '/var/lib/microservices/venv/lib/python2.7/site-packages' %}
+
+Listen {{ aodh.api_port.cont }}
+
+<VirtualHost *:{{ aodh.api_port.cont }}>
+    WSGIDaemonProcess aodh-api processes={{ aodh.wsgi.processes }} threads= {{ aodh.wsgi.threads  }} user=aodh group=aodh display-name=%{GROUP} python-path={{ venv_path }}
+    WSGIProcessGroup aodh-api
+    WSGIScriptAlias / /var/www/aodh/app
+    WSGIApplicationGroup %{GLOBAL}
+    ErrorLog /var/log/ccp/aodh/aodh-error.log
+    CustomLog /var/log/ccp/aodh/aodh-access.log access
+</VirtualHost>

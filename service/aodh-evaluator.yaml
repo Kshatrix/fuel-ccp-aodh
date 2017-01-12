@@ -1,0 +1,18 @@
+dsl_version: 0.5.0
+service:
+  name: aodh-evaluator
+  containers:
+    - name: aodh-evaluator
+      image: aodh-evaluator
+      daemon:
+        files:
+          - aodh-conf
+        dependencies:
+          - memcached
+          - aodh-api
+        command: aodh-evaluator --config-file /etc/aodh/aodh.conf
+
+files:
+  aodh-conf:
+    path: /etc/aodh/aodh.conf
+    content: aodh.conf.j2

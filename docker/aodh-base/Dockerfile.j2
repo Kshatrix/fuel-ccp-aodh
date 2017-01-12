@@ -1,0 +1,10 @@
+FROM {{ image_spec("openstack-base") }}
+MAINTAINER {{ maintainer }}
+
+{{ copy_sources("openstack/aodh", "/aodh") }}
+
+RUN useradd --user-group aodh \
+    && /var/lib/microservices/venv/bin/pip install --upgrade pymemcache aodhclient /aodh \
+    && mkdir -p /etc/aodh \
+    && cp -r /aodh/etc/aodh/* /etc/aodh \
+    && chown -R aodh:aodh /etc/aodh
