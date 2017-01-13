@@ -21,4 +21,7 @@ connection = mysql+pymysql://{{ aodh.db.username }}:{{ aodh.db.password }}@{{ ad
 [coordination]
 backend_url = memcached://{{ address("memcached", memcached.port) }}
 
+[prometheus]
+url = {{ address('prometheus', prometheus.port, with_scheme=True) }}
+
 {{ oslomessaging[messaging.backend.rpc]('rpc_config') }}
