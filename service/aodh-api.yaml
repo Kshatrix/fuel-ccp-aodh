@@ -59,7 +59,7 @@ service:
         files:
           - aodh-conf
           - wsgi-aodh-conf
-        command: aodh-api --port {{ aodh.api_port.cont }}
+        command: daemon.sh
 
 files:
   aodh-conf:
