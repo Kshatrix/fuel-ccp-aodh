@@ -4,7 +4,8 @@ MAINTAINER {{ maintainer }}
 COPY daemon.sh /usr/local/bin/daemon.sh
 COPY aodh_sudoers /etc/sudoers.d/aodh_sudoers
 
-RUN apt-get install -y --no-install-recommends \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
         mysql-client \
         apache2 \
         libapache2-mod-wsgi \
